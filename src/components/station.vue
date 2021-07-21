@@ -1,10 +1,10 @@
 <template>
   <div class="scale">
-      <div class="site-box">
-        <svg class="siteA">
+    <div class="site-box">
+      <svg width="40" height="11" class="siteA">
         <use xlink:href="@/assets/siteA.svg#siteA"> </use>
       </svg>
-      </div>
+    </div>
     <header class="scale_header">
       <h6>
         Площадка...
@@ -12,6 +12,15 @@
       <div class="scale-address">
         <p class="m-0">пр. Маршала Жукова, 55</p>
         <p>Ленинградская обл., г. Санкт-Петербург</p>
+      </div>
+      <div class="scale-location">
+        <svg width="22" height="22">
+          <use xlink:href="@/assets/location/street.svg#street"> </use>
+        </svg>
+      </div>
+      <div class="scale-location__coords">
+        <span>58.1834332</span>
+        <span>30.2383432</span>
       </div>
     </header>
     <main>
@@ -37,8 +46,56 @@
           </div>
         </div>
       </section>
-      <section class="data">
 
+      <section class="sector-data">
+        <div class="amount">
+          <div class="d-flex">
+            <div class="amount__circle mr-1"></div>
+            <div class="amount__circle"></div>
+            <div class="amount__circle"></div>
+            <div class="amount__circle"></div>
+          </div>
+          <div class="space-between__text"> 
+            <span>...</span>
+            <span>0/0</span>
+          </div>
+        </div>
+        <div class="legends">
+          <div class="sector">
+            <div class="sector-circle">
+              <svg width="20" height="20" class="sector-circle__item">
+                <use xlink:href="@/assets/legends/green.svg#green"></use>
+              </svg>
+              <svg id="yelllowsector" width="20" height="20" class="sector-circle__item">
+                <use xlink:href="@/assets/legends/yellow.svg#yellow"></use>
+              </svg>
+              <svg id="purplesector" width="20" height="20" class="sector-circle__item">
+                <use xlink:href="@/assets/legends/purple.svg#purple"></use>
+              </svg>
+            </div>
+          </div>
+          <div class="sector-symbols">
+
+            <div class="sector-symbols__value space-between__text">
+              <svg width="11" height="11">
+                <use xlink:href="@/assets/legends/degree.svg#degree"></use>
+              </svg>
+              <span>0.0°</span>
+            </div>
+            <div class="sector-symbols__value space-between__text">
+              <svg width="11" height="11">
+                <use xlink:href="@/assets/legends/triangle.svg#triangle"></use>
+              </svg>
+              <span>0.0°</span>
+            </div>
+            <div class="sector-symbols__value space-between__text">
+              <img src="@/assets/legends/ibeams.png" alt="ibeams">
+              <span>25m</span>
+            </div>
+
+          </div>
+        </div>
+        <div class="network-types"></div>
       </section>
     </main>
   </div>
@@ -50,7 +107,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .site-box{
   position: absolute;
   width: 71px;
@@ -71,11 +128,31 @@ export default {
   justify-content: space-between;
   margin: 20px; /* временно */
 }
-.scale_header{
-  margin: 56px 0  0 25px;
+.scale_header {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: repeat(2, 30px);
+  margin: 56px 0 0 25px;
 }
 .scale-address > p {
   font-size: 11px;
+  grid-row: 2;
+}
+.scale-location {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 25px;
+  grid-column: 2;
+  grid-row: 1;
+}
+.scale-location__coords {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 11px;
+  margin-right: 25px;
+  grid-row: 2;
+  grid-column: 2;
 }
 .scale_container {
   display: flex;
@@ -113,5 +190,54 @@ export default {
   height: 7px;
   width: 205px;
 }
+main {
+  display: grid;
+  grid-template-columns: 58% 42%;
+}
 
+.sector-data {
+  display: grid;
+  grid-template-rows: 17% 57% 26%;
+  grid-template-columns: 100%;
+  margin-left: 27px;
+  margin-right: 25px;
+  font-size: 11px;
+}
+.sector-circle {
+  position: relative;
+  border-radius: 50%;
+  background: #11DF71;
+  width: 8px;
+  height: 8px;
+}
+.sector-circle__item {
+  position: absolute;
+  bottom: 0;
+  right: 25%;
+}
+#purplesector {
+  left: 47%;
+  bottom: -11%;}
+#yelllowsector {
+  left: -52%;
+  bottom: 36%;
+}
+
+.amount__circle {
+  border-radius: 50%;
+  background: #EAEAEA;
+  width: 8px;
+  height: 8px;
+  margin-left: 5px;
+}
+.space-between__text {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.legends {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  grid-template-rows: repeat(4,25%);
+}
 </style>
