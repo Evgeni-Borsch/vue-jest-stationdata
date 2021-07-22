@@ -1,7 +1,6 @@
 
-
 {
-  "posts": [
+  "station": [
     {
       "id": "100",
       "description": "Площадка, отрисовываемая на карте по координатам",
@@ -193,9 +192,4 @@
       ]
     }
   ]
-  ,
-  "comments": [
-    { "id": 1, "body": "some comment", "postId": 1 }
-  ],
-  "profile": { "name": "typicode" }
 }

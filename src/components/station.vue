@@ -7,20 +7,19 @@
     </div>
     <header class="scale_header">
       <h6>
-        Площадка...
+        Площадка {{station_data.name}}
       </h6>
       <div class="scale-address">
-        <p class="m-0">пр. Маршала Жукова, 55</p>
-        <p>Ленинградская обл., г. Санкт-Петербург</p>
+        <p class="m-0">{{ stAddress().street }}, {{ stAddress().house }}</p>
+        <p>{{ stAddress().district }}, {{ stAddress().city }}</p>
       </div>
       <div class="scale-location">
         <svg width="22" height="22">
-          <use xlink:href="@/assets/location/street.svg#street"> </use>
+          <use xlink:href="@/assets/location/outdoor.svg#outdoor"> </use>
         </svg>
       </div>
       <div class="scale-location__coords">
-        <span>58.1834332</span>
-        <span>30.2383432</span>
+        <span v-for="coord in stCoords()" :key='coord'> {{ coord }} </span>
       </div>
     </header>
     <main>
@@ -90,7 +89,9 @@
               <span>0.0°</span>
             </div>
             <div class="sector-symbols__value space-between__text">
-              <img src="@/assets/legends/ibeams.png" alt="ibeams">
+              <svg width="11" height="11">
+                <use xlink:href="@/assets/legends/ibeams.svg#ibeams"></use>
+              </svg>
               <span>25m</span>
             </div>
           </div>
@@ -108,12 +109,75 @@
 
 <script>
 export default {
+  data(){
+    return {
+      station_data: null
+    }
+  },
+  methods:{
+    async get_station_data(station_id) {
+      try {
+        let res = await fetch(`
+           http://localhost:3000/station/${station_id}
+        `);
+        if (res.ok) { 
+          let data = await res.json();
+          return data;
+        } else {
+          console.error("Ошибка HTTP: " + res.status);
+        }
+      } catch(err){
+        console.log(err);
+      }
+    },
+    stCoords(){
+      try {
+        if(null === this.station_data){
+          return;
+        }
+        let coords = [],
+            lat = this.station_data.resourceCharacteristic.filter( e => e.name === "latitude" )[0],
+            lon = this.station_data.resourceCharacteristic.filter( e => e.name === "longitude" )[0];
+            coords.push(lat.value,lon.value)
+        return coords
 
+      }catch(err){
+        console.log(err);
+      }
+    },
+    stAddress(){
+      try {
+        if(null === this.station_data){
+          return;
+        }
+        // разбираем полный адрес станции
+        let addressArray = {...this.station_data.resourceCharacteristic.filter( e => e.name === "siteAddress")[0].value.split(',')};
+        let dataArray = {};
+        dataArray['district'] = addressArray[0].trim();
+        dataArray['city'] = addressArray[1].trim('.');
+        dataArray['street'] = addressArray[2].trim();
+        dataArray['house'] = addressArray[3].trim();
+        let result = dataArray;
+        return result;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  },
+  computed:{
+  },
+
+  created(){
+  },
+
+  async mounted(){
+    this.station_data = await this.get_station_data(100);
+  },
 }
 </script>
 
 <style scoped>
-.site-box{
+.site-box {
   position: absolute;
   width: 71px;
   height: 30px;
@@ -225,7 +289,12 @@ main {
   bottom: 0;
   right: 25%;
   z-index: 1;
+  cursor: pointer;
 }
+.sector-circle__item:hover {
+  stroke: #2C2C2C;
+}
+
 #purplesector {
   left: 47%;
   bottom: -11%;}
@@ -257,8 +326,10 @@ main {
   grid-row: 4;
 }
 .network > div {
+  font-size: 14px;
+  color: #fff;
   background: #EAEAEA;
-  padding: 8px 11px;
+  padding: 6px 11px;
   margin-left: 2px;
 }
 </style>
