@@ -10,7 +10,10 @@
   "dependencies": {
     "bootstrap": "^5.0.2",
     "core-js": "^3.6.5",
+    "faker": "^5.5.3",
     "jest": "^27.0.6",
+    "json-server": "^0.16.3",
+    "lodash": "^4.17.21",
     "vue": "^2.6.11"
   },
   "devDependencies": {
