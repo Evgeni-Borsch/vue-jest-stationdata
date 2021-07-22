@@ -74,8 +74,9 @@
               </svg>
             </div>
           </div>
-          <div class="sector-symbols">
 
+          <span class="sector-number">Сектор ...</span>
+          <div class="sector-symbols">
             <div class="sector-symbols__value space-between__text">
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/degree.svg#degree"></use>
@@ -92,10 +93,14 @@
               <img src="@/assets/legends/ibeams.png" alt="ibeams">
               <span>25m</span>
             </div>
-
+          </div>
+          <div class="network">
+            <div>2G</div>
+            <div>3G</div>
+            <div>LTE</div>
+            <div>5G</div>
           </div>
         </div>
-        <div class="network-types"></div>
       </section>
     </main>
   </div>
@@ -199,9 +204,12 @@ main {
   display: grid;
   grid-template-rows: 17% 57% 26%;
   grid-template-columns: 100%;
-  margin-left: 27px;
-  margin-right: 25px;
   font-size: 11px;
+  margin: 20px 25px 0px 27px;
+}
+.sector-symbols{
+  grid-row: 2;
+  grid-column: 2;
 }
 .sector-circle {
   position: relative;
@@ -209,11 +217,14 @@ main {
   background: #11DF71;
   width: 8px;
   height: 8px;
+  margin: 18px;
+  z-index: 10;
 }
 .sector-circle__item {
   position: absolute;
   bottom: 0;
   right: 25%;
+  z-index: 1;
 }
 #purplesector {
   left: 47%;
@@ -237,7 +248,17 @@ main {
 }
 .legends {
   display: grid;
-  grid-template-columns: 70% 30%;
-  grid-template-rows: repeat(4,25%);
+  grid-template-columns: 43% 57%;
+  grid-template-rows: 19px 57px 30px 32px;
+  margin-top: 30px;
+}
+.network {
+  display: flex;
+  grid-row: 4;
+}
+.network > div {
+  background: #EAEAEA;
+  padding: 8px 11px;
+  margin-left: 2px;
 }
 </style>
