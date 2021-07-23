@@ -1,9 +1,7 @@
 <template>
   <div class="scale">
     <div class="site-box">
-      <svg width="40" height="11" class="siteA">
-        <use xlink:href="@/assets/siteA.svg#siteA"> </use>
-      </svg>
+      <h6>Site A</h6>
     </div>
     <header class="scale_header">
       <h6>
@@ -18,38 +16,56 @@
           <use xlink:href="@/assets/location/outdoor.svg#outdoor"> </use>
         </svg>
       </div>
-      <div class="scale-location__coords">
+      <div class="scale-location__coords" >
         <span v-for="coord in stCoords()" :key='coord'> {{ coord }} </span>
       </div>
     </header>
     <main>
-      <section>
-        <div class="scale_container">
-          <div>
-            <svg class="scale__line w-1">
+      <section >
+        <div class="scale-container position-relative">
+          <div class="scale-height position-relative">
+
+            <svg class="scale-line">
               <use xlink:href="@/assets/scale.svg#scale"> </use>
             </svg>
+            <div class="amc-height">
+              <p>0м AMC</p>
+              <span class="position-absolute"></span>
+            </div>
+            <div class="antenna-height">
+              <p>0м</p>
+              <span class="position-absolute"></span>
+            </div>
           </div>
+          
           <div class="station">
-            <svg class="station-head">
+            <hr class="dashed-line w-100 antenna-height" />
+            <hr class="dashed-line w-100 amc-height" />
+            <div class="antennas-container">
+              <div class="antennas" style="background: #11DF71"></div>
+              <div class="antennas" style="background: #FFB932"></div>
+              <div class="antennas" style="background: #BAB9FF"></div>
+            </div>
+            <svg class="station-head skelet">
               <use xlink:href="@/assets/stationhead.svg#station-head"> </use>
             </svg>
 
-            <svg class="station-body">
+            <svg class="station-body skelet">
               <use xlink:href="@/assets/stationbody.svg#station-body"> </use>
             </svg>
 
-            <svg class="station-base h-1">
+            <svg class="station-base h-1 skelet">
               <use xlink:href="@/assets/stationbase.svg#station-base"> </use>
             </svg>
           </div>
+
         </div>
       </section>
 
       <section class="sector-data">
         <div class="amount">
           <div class="d-flex">
-            <div class="amount__circle mr-1"></div>
+            <div class="amount__circle"></div>
             <div class="amount__circle"></div>
             <div class="amount__circle"></div>
             <div class="amount__circle"></div>
@@ -62,44 +78,41 @@
         <div class="legends">
           <div class="sector">
             <div class="sector-circle">
-              <svg width="20" height="20" class="sector-circle__item">
+              <svg width="20" height="20" class="sector-circle__item" @click="get_sectordata(1)">
                 <use xlink:href="@/assets/legends/green.svg#green"></use>
               </svg>
-              <svg id="yelllowsector" width="20" height="20" class="sector-circle__item">
+              <svg id="yelllowsector" width="20" height="20" class="sector-circle__item" @click="get_sectordata(2)">
                 <use xlink:href="@/assets/legends/yellow.svg#yellow"></use>
               </svg>
-              <svg id="purplesector" width="20" height="20" class="sector-circle__item">
+              <svg id="purplesector" width="20" height="20" class="sector-circle__item" @click="get_sectordata(3)">
                 <use xlink:href="@/assets/legends/purple.svg#purple"></use>
               </svg>
             </div>
           </div>
 
-          <span class="sector-number">Сектор ...</span>
+          <span class="sector-number" >Сектор {{sectorNumber}}</span>
           <div class="sector-symbols">
             <div class="sector-symbols__value space-between__text">
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/degree.svg#degree"></use>
               </svg>
-              <span>0.0°</span>
+              <span>{{ azimuth.value === undefined ? '0' : azimuth.value }}.0°</span>
             </div>
             <div class="sector-symbols__value space-between__text">
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/triangle.svg#triangle"></use>
               </svg>
-              <span>0.0°</span>
+              <span>{{ tiltAngle.value === undefined ? '0' : tiltAngle.value }}.0°</span>
             </div>
             <div class="sector-symbols__value space-between__text">
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/ibeams.svg#ibeams"></use>
               </svg>
-              <span>25m</span>
+              <span>{{ mountHeight.value === undefined ? '0' : mountHeight.value }} m</span>
             </div>
           </div>
           <div class="network">
-            <div>2G</div>
-            <div>3G</div>
-            <div>LTE</div>
-            <div>5G</div>
+            <div class="network__item" v-for="item in network" :key="item">{{ item }}</div>
           </div>
         </div>
       </section>
@@ -111,45 +124,67 @@
 export default {
   data(){
     return {
-      station_data: null
+      sectorNumber:'...',
+      active: false,
+      station_data: {},
+      sector_data: {},
+      // sector_characteristic: {},
+      mountHeight: 0,
+      tiltAngle: 0,
+      azimuth: 0,
+      network:['2G','3G','LTE','5G']
     }
   },
   methods:{
-    async get_station_data(station_id) {
-      try {
-        let res = await fetch(`
-           http://localhost:3000/station/${station_id}
-        `);
-        if (res.ok) { 
-          let data = await res.json();
-          return data;
-        } else {
-          console.error("Ошибка HTTP: " + res.status);
-        }
-      } catch(err){
-        console.log(err);
-      }
+    get_sectordata(item){
+      console.log(document.querySelectorAll(".network__item"));
+      this.sectorNumber = `${item}`;
+      this.active = true;
+      document.querySelector(".antennas-container").style.display = 'flex';
+      document.querySelectorAll(".skelet").forEach(e => {
+        e.style.opacity = '1'; 
+        e.style.strokeDasharray = '0'
+      });
+
+      this.get_station_data(item, (data) => {
+        console.log(data);
+        this.sector_data = data;
+        this.mountHeight = {...data.resourceCharacteristic.filter( e => e.name === "mountHeight")[0]};
+        this.tiltAngle = {...data.resourceCharacteristic.filter( e => e.name === "tiltAngle")[0]};
+        this.azimuth = {...data.resourceCharacteristic.filter( e => e.name === "azimuth")[0]};
+      });
     },
+
+    get_station_data(station_id, cb) {
+      fetch(`
+        http://localhost:3000/station/${station_id}
+      
+      `).then(res => {
+        return res.json();
+      
+      }).then(data => {
+        cb(data);
+        return data;
+      
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
+
     stCoords(){
       try {
-        if(null === this.station_data){
-          return;
-        }
         let coords = [],
             lat = this.station_data.resourceCharacteristic.filter( e => e.name === "latitude" )[0],
             lon = this.station_data.resourceCharacteristic.filter( e => e.name === "longitude" )[0];
-            coords.push(lat.value,lon.value)
+        coords.push(lat.value,lon.value)
         return coords
-
       }catch(err){
         console.log(err);
       }
     },
+
     stAddress(){
       try {
-        if(null === this.station_data){
-          return;
-        }
         // разбираем полный адрес станции
         let addressArray = {...this.station_data.resourceCharacteristic.filter( e => e.name === "siteAddress")[0].value.split(',')};
         let dataArray = {};
@@ -165,28 +200,35 @@ export default {
     }
   },
   computed:{
+    // mountHeight(){
+    //   let result = this.sector_characteristic.filter( e => e.name === "mountHeight");
+    //   return result;
+    // }
   },
 
   created(){
+    this.get_station_data(100, data => {
+      this.station_data = data;
+    });
   },
 
-  async mounted(){
-    this.station_data = await this.get_station_data(100);
+  mounted(){
+    // this.station_data = this.get_station_data(100);
   },
 }
 </script>
 
-<style scoped>
+<style >
 .site-box {
+  color: #fff;
   position: absolute;
   width: 71px;
   height: 30px;
   background: #2C2C2C;
 }
-.siteA{
-  position: absolute;
-  left: 15px;
-  top: 9px;
+.site-box > h6 {
+  margin: 8px 16px;
+  font-size: 11px;
 }
 .scale {
   display: flex;
@@ -201,7 +243,7 @@ export default {
   display: grid;
   grid-template-columns: 50% 50%;
   grid-template-rows: repeat(2, 30px);
-  margin: 56px 0 0 25px;
+  margin: 56px 0 15px 25px;
 }
 .scale-address > p {
   font-size: 11px;
@@ -223,14 +265,41 @@ export default {
   grid-row: 2;
   grid-column: 2;
 }
-.scale_container {
+.scale-container {
   display: flex;
   margin: 0 0 20px 25px;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-end;
+  font-size: 8px;
 }
-.scale__line{
+.scale-height {
+  width: 68px;
+}
+.scale-height > div {
+  display: inline-flex;
+  flex-direction: row;
+  align-content: flex-start;
+  align-items: center;
+  width: 100%;
+  position: absolute;
+}
+.antenna-height {
+  bottom: 77%;
+}
+.amc-height {
+  bottom: 97%;
+}
+.scale-height > div > p {
+  margin: 0 0 0px 5px;
+}
+.scale-height > div > span { 
+  font-size: 8px;
+  line-height: 10px;
+  background: black;
+  width: 4px;
+  height: 2px;
+  border-radius: 33%;
+}
+.scale-line{
+  position: relative;
   height: 225px;
   width: 2px;
 }
@@ -241,8 +310,21 @@ export default {
   position: relative;
   width: 270px;
 }
-.station-head, .station-body, .station-base {
-  display: block;
+.antennas-container{
+  position: absolute;
+  top: 4%;
+  display: none;
+  justify-content: space-between;
+  width: 62px;
+  height: 20px;
+}
+.antennas {
+  height: 20px;
+  width: 10px;
+  border: 1px solid #1D1D1D;
+  border-radius: 2px;
+  z-index: 10;
+
 }
 .station-body{
   display: block;
@@ -259,11 +341,21 @@ export default {
   height: 7px;
   width: 205px;
 }
+.skelet{
+  opacity: 0.3;
+  stroke-dasharray: 2 5;
+}
+
+
 main {
   display: grid;
   grid-template-columns: 58% 42%;
 }
-
+.dashed-line {
+  position: absolute;
+  margin: 5px;
+  background: repeating-linear-gradient(90deg,#000,#000 6px,transparent 6px,transparent 12px);
+}
 .sector-data {
   display: grid;
   grid-template-rows: 17% 57% 26%;
@@ -282,25 +374,38 @@ main {
   width: 8px;
   height: 8px;
   margin: 18px;
-  z-index: 10;
 }
 .sector-circle__item {
   position: absolute;
   bottom: 0;
   right: 25%;
-  z-index: 1;
   cursor: pointer;
+  opacity: 0.3;
 }
 .sector-circle__item:hover {
+  transform: scale(1.2);
   stroke: #2C2C2C;
+  opacity: 1;
+  right: 87%;
+  bottom: 28%;
+  transition: 0.3s;
 }
 
 #purplesector {
   left: 47%;
-  bottom: -11%;}
+  bottom: -11%;
+}
+#purplesector:hover {
+  left: 118%;
+  bottom: 5%;
+}
 #yelllowsector {
   left: -52%;
   bottom: 36%;
+}
+#yelllowsector:hover{
+  left: -43%;
+  bottom: 102%;
 }
 
 .amount__circle {
