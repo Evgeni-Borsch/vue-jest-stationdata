@@ -21,8 +21,8 @@
       </div>
     </header>
     <main>
-      <section >
-        <div class="scale-container position-relative">
+      <section>
+        <div class="scale-container">
           <div class="scale-height position-relative">
 
             <svg class="scale-line">
