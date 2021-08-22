@@ -1,15 +1,15 @@
 <template>
   <div class="scale">
     <div class="site-box">
-      <h6>Site A</h6>
+      <h6>{{station_data.type}} A</h6>
     </div>
     <header class="scale_header">
       <h6>
         Площадка {{station_data.name}}
       </h6>
       <div class="scale-address">
-        <p class="m-0">{{ stAddress().street }}, {{ stAddress().house }}</p>
-        <p>{{ stAddress().district }}, {{ stAddress().city }}</p>
+        <p class="m-0">{{ addressParse.street }}, {{ addressParse.house }}</p>
+        <p>{{ addressParse.district }}, {{ addressParse.city }}</p>
       </div>
       <div class="scale-location">
         <svg width="22" height="22">
@@ -17,7 +17,7 @@
         </svg>
       </div>
       <div class="scale-location__coords" >
-        <span v-for="coord in stCoords()" :key='coord'> {{ coord }} </span>
+        <span v-for="coord in coords" :key='coord'> {{ coord }} </span>
       </div>
     </header>
     <main>
@@ -96,19 +96,19 @@
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/degree.svg#degree"></use>
               </svg>
-              <span>{{ azimuth.value === undefined ? '0' : azimuth.value }}.0°</span>
+              <span>{{ filterArrayByName(this.sector_params,"azimuth") }}.0°</span>
             </div>
             <div class="sector-symbols__value space-between__text">
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/triangle.svg#triangle"></use>
               </svg>
-              <span>{{ tiltAngle.value === undefined ? '0' : tiltAngle.value }}.0°</span>
+              <span>{{ filterArrayByName(this.sector_params,"tiltAngle") }}.0°</span>
             </div>
             <div class="sector-symbols__value space-between__text">
               <svg width="11" height="11">
                 <use xlink:href="@/assets/legends/ibeams.svg#ibeams"></use>
               </svg>
-              <span>{{ mountHeight.value === undefined ? '0' : mountHeight.value }} m</span>
+              <span>{{ this.filterArrayByName(this.sector_params,"mountHeight") }} m</span>
             </div>
           </div>
           <div class="network">
@@ -122,22 +122,46 @@
 
 <script>
 export default {
-  data(){
+  data() {
     return {
       sectorNumber:'...',
       active: false,
       station_data: {},
-      sector_data: {},
-      // sector_characteristic: {},
-      mountHeight: 0,
-      tiltAngle: 0,
+      coords:[],
+      addressParse:{},
+      base_station_data: {},
+      sector_params: {},
       azimuth: 0,
       network:['2G','3G','LTE','5G']
     }
   },
-  methods:{
-    get_sectordata(item){
-      console.log(document.querySelectorAll(".network__item"));
+  methods: {
+    filterArrayByName(array, string){
+      let newArray = {};
+      if(Array.isArray(array)) {
+        newArray = {...array.filter( e => e.name == string )[0]};
+        // console.log(newArray.value);
+        return newArray.value;
+      }
+    },
+    get_sectordata(item) {
+      // тянем данные, которых нехватает, с базовой станции с индексом 101  
+      this.get_station_data(101, data => {
+        this.base_station_data = data;
+        let networkFromBase = this.filterArrayByName(this.base_station_data.resourceCharacteristic, "cabinetType");
+        console.log(data);
+        console.log(networkFromBase);
+      });
+      let network__item = document.querySelectorAll(".network__item");
+      console.log(network__item);
+      
+      for (let i = 0; i < network__item.length; i++) {
+        let e = network__item[i],
+            arr = [];
+        arr.push(e);
+        console.log(arr);
+      }
+      
       this.sectorNumber = `${item}`;
       this.active = true;
       document.querySelector(".antennas-container").style.display = 'flex';
@@ -147,17 +171,13 @@ export default {
       });
 
       this.get_station_data(item, (data) => {
-        console.log(data);
-        this.sector_data = data;
-        this.mountHeight = {...data.resourceCharacteristic.filter( e => e.name === "mountHeight")[0]};
-        this.tiltAngle = {...data.resourceCharacteristic.filter( e => e.name === "tiltAngle")[0]};
-        this.azimuth = {...data.resourceCharacteristic.filter( e => e.name === "azimuth")[0]};
+        this.sector_params = data.resourceCharacteristic;
       });
     },
 
     get_station_data(station_id, cb) {
       fetch(`
-        http://localhost:3000/station/${station_id}
+        http://localhost:3004/station/${station_id}
       
       `).then(res => {
         return res.json();
@@ -171,13 +191,11 @@ export default {
       });
     },
 
-    stCoords(){
+    stCoords(data){
       try {
-        let coords = [],
-            lat = this.station_data.resourceCharacteristic.filter( e => e.name === "latitude" )[0],
-            lon = this.station_data.resourceCharacteristic.filter( e => e.name === "longitude" )[0];
-        coords.push(lat.value,lon.value)
-        return coords
+        let lat = this.filterArrayByName(data,"latitude"),
+        lon = this.filterArrayByName(data,"longitude");
+        this.coords.push(lat,lon);
       }catch(err){
         console.log(err);
       }
@@ -189,32 +207,30 @@ export default {
         let addressArray = {...this.station_data.resourceCharacteristic.filter( e => e.name === "siteAddress")[0].value.split(',')};
         let dataArray = {};
         dataArray['district'] = addressArray[0].trim();
-        dataArray['city'] = addressArray[1].trim('.');
+        dataArray['city'] = addressArray[1].trim();
         dataArray['street'] = addressArray[2].trim();
         dataArray['house'] = addressArray[3].trim();
-        let result = dataArray;
-        return result;
+        this.addressParse = dataArray;
       } catch (err) {
         console.log(err);
       }
     }
   },
   computed:{
-    // mountHeight(){
-    //   let result = this.sector_characteristic.filter( e => e.name === "mountHeight");
-    //   return result;
-    // }
   },
 
-  created(){
+  created() {
     this.get_station_data(100, data => {
       this.station_data = data;
+      this.stCoords(data.resourceCharacteristic);
+      this.stAddress();
     });
   },
 
   mounted(){
-    // this.station_data = this.get_station_data(100);
+
   },
+
 }
 </script>
 
@@ -437,4 +453,5 @@ main {
   padding: 6px 11px;
   margin-left: 2px;
 }
+.sector-number:focus
 </style>
